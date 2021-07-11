@@ -13,14 +13,14 @@ def one_day_before(day):
     return day - datetime.timedelta(days=1)
 
 
-def get_last_trading_day_data_for(day, daily_time_series):
+def get_last_trading_day_closing_price_for(day, daily_time_series):
     day_formatted = day.strftime("%Y-%m-%d")
     trade_data = daily_time_series.get(day_formatted)
     if trade_data:
-        return day, trade_data
+        return day, float(trade_data["4. close"])
     else:
         one_day_before_current = one_day_before(day)
-        return get_last_trading_day_data_for(one_day_before_current, daily_time_series)
+        return get_last_trading_day_closing_price_for(one_day_before_current, daily_time_series)
 
 
 def calculate_stock_price_change():
@@ -33,10 +33,10 @@ def calculate_stock_price_change():
     response = requests.get(url, params=query_params)
     data = response.json()
     daily_time_series = data["Time Series (Daily)"]
-    last_trading_day, most_recent_trading_day_data = get_last_trading_day_data_for(date.today(), daily_time_series)
-    current_closing_price = most_recent_trading_day_data["4. close"]
+    last_trading_day, most_recent_trading_day_price = get_last_trading_day_closing_price_for(date.today(), daily_time_series)
     day_before_last_trading_day = one_day_before(last_trading_day)
-    _, penultimate_trading_day_data = get_last_trading_day_data_for(day_before_last_trading_day, daily_time_series)
+    _, penultimate_trading_day_price = get_last_trading_day_closing_price_for(day_before_last_trading_day, daily_time_series)
+    return most_recent_trading_day_price - penultimate_trading_day_price
 
 
 stock_price_change = calculate_stock_price_change()
