@@ -33,9 +33,15 @@ def calculate_stock_price_change():
     response = requests.get(url, params=query_params)
     data = response.json()
     daily_time_series = data["Time Series (Daily)"]
-    last_trading_day, most_recent_trading_day_price = get_last_trading_day_closing_price_for(date.today(), daily_time_series)
+    last_trading_day, most_recent_trading_day_price = get_last_trading_day_closing_price_for(
+        date.today(),
+        daily_time_series,
+    )
     day_before_last_trading_day = one_day_before(last_trading_day)
-    _, penultimate_trading_day_price = get_last_trading_day_closing_price_for(day_before_last_trading_day, daily_time_series)
+    _, penultimate_trading_day_price = get_last_trading_day_closing_price_for(
+        day_before_last_trading_day,
+        daily_time_series,
+    )
     return most_recent_trading_day_price - penultimate_trading_day_price
 
 
