@@ -9,16 +9,20 @@ STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
 
 
+def day_before(last_trading_day):
+    return last_trading_day - datetime.timedelta(days=1)
+
+
 # TODO refact to recursive
 def get_last_trading_day_data_for(day, daily_time_series):
     last_trading_day = day
     last_trading_day_formatted = last_trading_day.strftime("%Y-%m-%d")
     trade_data = daily_time_series.get(last_trading_day_formatted)
     while not trade_data:
-        last_trading_day = last_trading_day - datetime.timedelta(days=1)
+        last_trading_day = day_before(last_trading_day)
         last_trading_day_formatted = last_trading_day.strftime("%Y-%m-%d")
         trade_data = daily_time_series.get(last_trading_day_formatted)
-    return trade_data
+    return last_trading_day, trade_data
 
 
 def calculate_stock_price_change():
@@ -31,8 +35,10 @@ def calculate_stock_price_change():
     response = requests.get(url, params=query_params)
     data = response.json()
     daily_time_series = data["Time Series (Daily)"]
-    most_recent_trading_day_data = get_last_trading_day_data_for(date.today(), daily_time_series)
+    last_trading_day, most_recent_trading_day_data = get_last_trading_day_data_for(date.today(), daily_time_series)
     current_closing_price = most_recent_trading_day_data["closing"]
+    day_before_last_trading_day = day_before(last_trading_day)
+    _, penultimate_trading_day_data = get_last_trading_day_data_for(day_before_last_trading_day, daily_time_series)
 
 
 stock_price_change = calculate_stock_price_change()
