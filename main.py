@@ -1,8 +1,21 @@
+# -*- coding: utf-8 -*-
+import datetime
+
+import requests
+from datetime import date
+from secrets import ALPHA_VANTAGE_API_KEY
+
 STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
 
-## STEP 1: Use https://www.alphavantage.co
-# When STOCK price increase/decreases by 5% between yesterday and the day before yesterday then print("Get News").
+
+def calculate_stock_price_change():
+    pass
+
+
+stock_price_change = calculate_stock_price_change()
+if abs(stock_price_change) > 0:
+    print("Get News")
 
 ## STEP 2: Use https://newsapi.org
 # Instead of printing ("Get News"), actually get the first 3 news pieces for the COMPANY_NAME. 
