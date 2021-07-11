@@ -9,8 +9,30 @@ STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
 
 
+# TODO refact to recursive
+def get_last_trading_day_data_for(day, daily_time_series):
+    last_trading_day = day
+    last_trading_day_formatted = last_trading_day.strftime("%Y-%m-%d")
+    trade_data = daily_time_series.get(last_trading_day_formatted)
+    while not trade_data:
+        last_trading_day = last_trading_day - datetime.timedelta(days=1)
+        last_trading_day_formatted = last_trading_day.strftime("%Y-%m-%d")
+        trade_data = daily_time_series.get(last_trading_day_formatted)
+    return trade_data
+
+
 def calculate_stock_price_change():
-    pass
+    url = "https://www.alphavantage.co/query"
+    query_params = {
+        "function": "TIME_SERIES_DAILY",
+        "symbol": STOCK,
+        "apikey": ALPHA_VANTAGE_API_KEY,
+    }
+    response = requests.get(url, params=query_params)
+    data = response.json()
+    daily_time_series = data["Time Series (Daily)"]
+    most_recent_trading_day_data = get_last_trading_day_data_for(date.today(), daily_time_series)
+    current_closing_price = most_recent_trading_day_data["closing"]
 
 
 stock_price_change = calculate_stock_price_change()
