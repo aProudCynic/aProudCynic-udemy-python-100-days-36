@@ -49,7 +49,6 @@ def calculate_stock_price_change():
 
 
 def get_latest_news_about(company_name):
-
     url = "https://newsapi.org/v2/top-headlines"
     query_params = {
         "q": company_name,
@@ -58,6 +57,8 @@ def get_latest_news_about(company_name):
     }
     response = requests.get(url, params=query_params)
     data = response.json()
+    articles = data['articles']
+    return [{'title': article['title'], 'description': article['description']} for article in articles]
 
 
 stock_price_change = calculate_stock_price_change()
