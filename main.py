@@ -6,7 +6,13 @@ from datetime import date
 from secrets import (
     ALPHA_VANTAGE_API_KEY,
     NEWSAPI_API_KEY,
+    TWILIO_ACCOUNT_SID,
+    TWILIO_AUTH_TOKEN,
+    TWILIO_TEST_PHONE_NUMBER,
+    TWILIO_MESSAGING_SERVICE_SID,
 )
+from twilio.rest import Client
+
 
 STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
@@ -61,22 +67,27 @@ def get_latest_news_about(company_name):
     return [{'title': article['title'], 'description': article['description']} for article in articles]
 
 
+def create_message_from(stock_price_change, news):
+    formatted_news = f"{STOCK}: {'🔺' if stock_price_change > 0 else '🔻'}{stock_price_change}"
+    for article in news:
+        formatted_news += f"""
+    Headline: {article['title']}
+    Brief: {article['description']}
+    """
+    return formatted_news
+
+
+def send_sms(message):
+    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    client.messages.create(
+        to=TWILIO_TEST_PHONE_NUMBER,
+        messaging_service_sid=TWILIO_MESSAGING_SERVICE_SID,
+        body=message,
+    )
+
+
 stock_price_change = calculate_stock_price_change()
 if abs(stock_price_change) > 0:
-    get_latest_news_about(COMPANY_NAME)
-
-## STEP 3: Use https://www.twilio.com
-# Send a seperate message with the percentage change and each article's title and description to your phone number. 
-
-
-#Optional: Format the SMS message like this: 
-"""
-TSLA: 🔺2%
-Headline: Were Hedge Funds Right About Piling Into Tesla Inc. (TSLA)?. 
-Brief: We at Insider Monkey have gone over 821 13F filings that hedge funds and prominent investors are required to file by the SEC The 13F filings show the funds' and investors' portfolio positions as of March 31st, near the height of the coronavirus market crash.
-or
-"TSLA: 🔻5%
-Headline: Were Hedge Funds Right About Piling Into Tesla Inc. (TSLA)?. 
-Brief: We at Insider Monkey have gone over 821 13F filings that hedge funds and prominent investors are required to file by the SEC The 13F filings show the funds' and investors' portfolio positions as of March 31st, near the height of the coronavirus market crash.
-"""
-
+    news = get_latest_news_about(COMPANY_NAME)
+    message = create_message_from(stock_price_change, news)
+    send_sms(message)
