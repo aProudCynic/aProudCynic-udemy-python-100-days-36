@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+from math import ceil
 
 import requests
 from datetime import date
@@ -32,7 +33,7 @@ def get_last_trading_day_closing_price_for(day, daily_time_series):
         return get_last_trading_day_closing_price_for(one_day_before_current, daily_time_series)
 
 
-def calculate_stock_price_change():
+def calculate_stock_price_change_percentage():
     url = "https://www.alphavantage.co/query"
     query_params = {
         "function": "TIME_SERIES_DAILY",
@@ -51,7 +52,9 @@ def calculate_stock_price_change():
         day_before_last_trading_day,
         daily_time_series,
     )
-    return most_recent_trading_day_price - penultimate_trading_day_price
+    difference = most_recent_trading_day_price - penultimate_trading_day_price
+    difference_percent = difference / most_recent_trading_day_price * 100
+    return ceil(difference_percent)
 
 
 def get_latest_news_about(company_name):
@@ -68,7 +71,7 @@ def get_latest_news_about(company_name):
 
 
 def create_message_from(stock_price_change, news):
-    formatted_news = f"{STOCK}: {'🔺' if stock_price_change > 0 else '🔻'}{stock_price_change}"
+    formatted_news = f"{STOCK}: {'🔺' if stock_price_change > 0 else '🔻'}{stock_price_change}%"
     for article in news:
         formatted_news += f"""
     Headline: {article['title']}
@@ -86,7 +89,7 @@ def send_sms(message):
     )
 
 
-stock_price_change = calculate_stock_price_change()
+stock_price_change = calculate_stock_price_change_percentage()
 if abs(stock_price_change) > 0:
     news = get_latest_news_about(COMPANY_NAME)
     message = create_message_from(stock_price_change, news)
