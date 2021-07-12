@@ -3,7 +3,10 @@ import datetime
 
 import requests
 from datetime import date
-from secrets import ALPHA_VANTAGE_API_KEY
+from secrets import (
+    ALPHA_VANTAGE_API_KEY,
+    NEWSAPI_API_KEY,
+)
 
 STOCK = "TSLA"
 COMPANY_NAME = "Tesla Inc"
@@ -45,12 +48,21 @@ def calculate_stock_price_change():
     return most_recent_trading_day_price - penultimate_trading_day_price
 
 
+def get_latest_news_about(company_name):
+
+    url = "https://newsapi.org/v2/top-headlines"
+    query_params = {
+        "q": company_name,
+        "apiKey": NEWSAPI_API_KEY,
+        "pageSize": 3,
+    }
+    response = requests.get(url, params=query_params)
+    data = response.json()
+
+
 stock_price_change = calculate_stock_price_change()
 if abs(stock_price_change) > 0:
-    print("Get News")
-
-## STEP 2: Use https://newsapi.org
-# Instead of printing ("Get News"), actually get the first 3 news pieces for the COMPANY_NAME. 
+    get_latest_news_about(COMPANY_NAME)
 
 ## STEP 3: Use https://www.twilio.com
 # Send a seperate message with the percentage change and each article's title and description to your phone number. 
